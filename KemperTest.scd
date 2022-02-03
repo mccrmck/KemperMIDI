@@ -5,103 +5,70 @@ MIDIClient.destinations;
 ~midiOut = MIDIOut(0)
 
 
-var path = "/Users/mikemccormick/Library/Application Support/SuperCollider/Extensions/YAWN/songs/numberFour/kemperMIDI/buildup.mid";
+var path = "/Users/mikemccormick/Library/Application Support/SuperCollider/Extensions/YAWN/songs/numberFour/kemperMIDI/beginning.mid";
 x = SimpleMIDIFile.read(path)
 .timeMode_(\seconds)
 .midiEvents;
 
-x.midiEvents[..40].do(_.postln)
+x
 
-x.size
+x[..40].do(_.postln)
 
-y = x.midiEvents.select({ |e| e[2] == \cc })
-z = x.midiEvents.select({ |e| e[2] == \program })
+
+a = x.collect({ |event| event[1] }).differentiate.drop(1);
+b  = x.collect({ |event| event = event.replace(\cc,'control'); event[2] });
+c = x.collect({ |event| event[3] });
+d  = x.collect({ |event| event[4] });
+e  = x.collect({ |event| event[5] });
+
+
+
+////
+
+Server.default.options.device = "Saffire"
+
+MIDIClient.restart
+MIDIClient.init
+
+KemperMIDI.midiOut
+
+
+KemperMIDI("Pro40")
+
+0.1.asBoolean
+a
+a = MIDIOut.newByName("Pro40","MIDI")
+MIDIOut(a)
 
 (
-~cTimes = y.collect({ |e| e[1]}).differentiate.rotate(1).drop(1);
-~cChan = y.collect({ |e| e[3]});
-~ctlNum = y.collect({ |e| e[4]});
-~cVal = y.collect({ |e| e[5]});
+var pathToKemperMIDI = "/Users/mikemccormick/Library/Application Support/SuperCollider/Extensions/YAWN/Songs/numberFour/kemperMIDI/";
+KemperMIDI.makePat('test1',pathToKemperMIDI ++ "count.mid")
 )
 
-Pdef(\test,
-	Pbind(
-		\type,\midi,
-		\midiout,~midiOut,
-		\midicmd, \control,
 
-		\chan,Pseq(~cChan), // 0-15
-		\ctlNum,Pseq(~ctlNum), //controller number to receive value
-		\control,Pseq(~cVal), // val
-		\dur,Pseq( ~cTimes, inf),
-	)
-);
+Server.default.options.device = "Saffire"
 
 
-(
-~pTimes = z.collect({|e| e[1]}).differentiate.drop(1);
-~pChan = z.collect({|e| e[3]});
-~pgmNum = z.collect({ |e| e[4]});
-)
-
-Pdef(\test1,
-	Pbind(
-		\type,\midi,
-		\midiout,~midiOut,
-		\midicmd, \program,
-
-		\chan,Pseq( ~pChan ), //0-15
-		\progNum,Pseq(~pgmNum), //0-127
-		\dur,Pseq(~pTimes, inf),
-	)
-);
+~yawn = YAWNShow([\cement,\numberOne,\numberTwo,\numberFour],"Pro40",0);  //change clickOut to 2
 
 
-Pdef(\mstr,
-	Ppar([
-		Pdef(\test),
-		Pdef(\test1),
-		~click
-	])
-).play
-
-
-Pdef(\mstr).play
-~click = ~yawn.songArray[3].cueFrom('fourOutro','fourOutro',true,false,true)
-
-~yawn.songArray[3].cueFrom(,)
-
-~click.stop
-Pdef(\test1).stop
+~yawn.songArray
 
 
 
-Pdef(\mstr,
-	Ppar([
+KemperMIDI.cues['fourBeginning'].pattern.asStream.next(())
 
-		Pdef(\test,
-			Pbind(
-				\type,\midi,
-				\midiout,~midiOut,
-				\midicmd, \control,
+Ptrace(g).play
 
-				\chan,Pseq(~cChan), // 0-15
-				\ctlNum,Pseq(~ctlNum), //controller number to receive value
-				\control,Pseq(~cVal), // val
-				\dur,Pseq( ~cTimes, inf),
-			)
-		),
-		Pdef(\test1,
-			Pbind(
-				\type,\midi,
-				\midiout,~midiOut,
-				\midicmd, \program,
 
-				\chan,Pseq( ~pChan ), //0-15
-				\progNum,Pseq(~pgmNum), //0-127
-				\dur,Pseq(~pTimes, inf),
-			)
-		),
+a = YAWNSong('numberFour').cueFrom('fourBeginning','fourBeginning',true,false, true)
+a
+a.play
+a.stop
 
-	])
-)
+
+
+
+Pdef('fourBeginning').stop
+
+

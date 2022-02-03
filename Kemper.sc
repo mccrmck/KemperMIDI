@@ -6,55 +6,60 @@ KemperMIDI {
 		cues = IdentityDictionary();
 	}
 
-	*new { | midiDeviceName |
-		^super.new.init(midiDeviceName);
+	*new { | device |
+		^super.new.init(device);
 	}
 
 	init { | device |
-		var server = Server.default;
+		var port, server = Server.default;
+		device = device.asString;
+
 		Routine({
 			MIDIClient.init;
 			server.sync;
-			midiOut = MIDIOut.newByName(device.asString)
+			MIDIClient.destinations.do({ |source|
+				if(source.device == device,{ port = source.name.asString });
+
+			});
+
+			midiOut = MIDIOut.newByName(device,port);
 		}).play;
 	}
 
 	*loadFromMIDI { |key, path, loopKey|
 		var pathToMIDI = path.asString;
 
-		if(pathToMIDI.extension == "mid",{
+		if( pathToMIDI.extension == "mid",{
+			var bool;
+			var times, cmds, chans, nums, vals;
 			var file = SimpleMIDIFile.read(pathToMIDI)
 			.timeMode_(\seconds)
 			.midiEvents;
 
-			var cTimes, cChan, cNum, cVal, pTimes, pChan, pNum;
+			if(file.size > 0,{
+				bool  = [1];
+				times = file.collect({ |event| event[1] }).differentiate.drop(1);
+				cmds  = file.collect({ |event| event = event.replace(\cc,'control'); event[2] });
+				chans = file.collect({ |event| event[3] });
+				nums  = file.collect({ |event| event[4] });
+				vals  = file.collect({ |event| event[5] });
 
-			var cc = file.select({ |event| event[2] == \cc });
-			var program = file.select({ |event| event[2] == \program });
-
-			cTimes = cc.collect({ |event| event[1] }).differentiate.drop(1);
-			cChan  = cc.collect({ |event| event[3] });
-			cNum   = cc.collect({ |event| event[4] });
-			cVal   = cc.collect({ |event| event[5] });
-
-			pTimes = program.collect({ |event| event[1] }).differentiate.drop(1);
-			pChan  = program.collect({ |event| event[3] });
-			pNum   = program.collect({ |event| event[4] });
+			},{
+				bool = times = cmds = chans = nums = vals = [ nil ];
+			});
 
 			cues.put(key.asSymbol,
 				(
-					cTimes:  cTimes ? [0],
-					cChan:   cChan ? [0],
-					cNum:    cNum ? [0],
-					control: cVal ? [0],
-
-					pTimes: pTimes ? [0],
-					pChan:  pChan ? [0],
-					pNum:   pNum ? [0],
+					bool:  bool.unbubble.asBoolean,
+					times: times,
+					cmds:  cmds,
+					chans: chans,
+					nums:  nums,
+					vals:  vals
 				)
 			);
 
-			if(loopKey.notNil,{ cues[key.asSymbol].put(loopKey.asSymbol, true) });
+			if( loopKey.notNil,{ cues[key.asSymbol].put(loopKey.asSymbol, true) });
 		},{
 			"bad path, must be a .mid file!".throw;
 		});
@@ -74,49 +79,40 @@ KemperMIDI {
 			this.loadFromMIDI(uniqueKey, path, loopKey);
 		});
 
-		if(MIDIClient.initialized,{
-			var cTimes = cues[uniqueKey]['cTimes'];
-			var cChan  = cues[uniqueKey]['cChan'];
-			var cNum   = cues[uniqueKey]['cNum'];
-			var cVal   = cues[uniqueKey]['control'];
+		if( MIDIClient.initialized,{
 
-			var pTimes = cues[uniqueKey]['pTimes'];
-			var pChan  = cues[uniqueKey]['pChan'];
-			var pNum   = cues[uniqueKey]['cNum'];
+			if( cues[uniqueKey]['bool'],{
+				var times = cues[uniqueKey]['times'];
+				var cmds  = cues[uniqueKey]['cmds'];
+				var chans = cues[uniqueKey]['chans'];
+				var nums  = cues[uniqueKey]['nums'];
+				var vals  = cues[uniqueKey]['vals'];
 
-			if(loopKey.notNil,{
-				// var pattern =
-				// cues[uniqueKey].put('pattern',pattern);
+				if(loopKey.notNil,{
+					"hahahaha".postln;
+				},{
+					var pattern = Pbind(
+						\type,\midi,
+						\midiout,midiOut,
+						\dur,Pseq( times ),
+						\midicmd, Pseq( cmds ),
+						\chan,Pseq( chans ),   // 0-15
+
+						\nums, Pseq( nums ),
+						\progNum, Pkey(\nums),
+						\ctlNum, Pkey(\nums),
+						\control, Pkey( vals ),
+						\dummy,Pfunc({|e| e.postln })
+					);
+					cues[uniqueKey].put('pattern',pattern)
+				})
 			},{
-				var pattern = Pdef(uniqueKey,
-					Ppar([
-						Pdef(\test,
-							Pbind(
-								\type,\midi,
-								\midiout,midiOut,
-								\midicmd, \control,
-
-								\chan,Pseq(cChan),   // 0-15
-								\ctlNum,Pseq(cNum),  // controller number to receive value
-								\control,Pseq(cVal), // val
-								\dur,Pseq( cTimes, inf),
-							)
-						),
-						Pdef(\test1,
-							Pbind(
-								\type,\midi,
-								\midiout,midiOut,
-								\midicmd, \program,
-
-								\chan,Pseq(pChan),   // 0-15
-								\progNum,Pseq(pNum), // 0-127
-								\dur,Pseq(pTimes, inf),
-							)
-						)
-					])
+				var pattern = Pbind(
+					\dur,Pseq([0],1), // eventually has to be a proper delta
+					\note, Rest(0.01)
 				);
 				cues[uniqueKey].put('pattern',pattern)
-			})
+			});
 		},{
 			"MIDIClient not initialized".throw;
 		});
