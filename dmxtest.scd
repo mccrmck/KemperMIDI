@@ -80,7 +80,7 @@ Pdef(\mstr).stop
 
 //
 (
-var path = "/Users/mikemccormick/Downloads/Hvit flæsh.mid";
+var path = ;
 ~dmxTest = SimpleMIDIFile.read(path)
 .timeMode_(\seconds)
 )

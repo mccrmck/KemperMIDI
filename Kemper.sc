@@ -91,7 +91,7 @@ KemperMIDI {
 				if(loopKey.notNil,{
 					"hahahaha".postln;
 				},{
-					var pattern = Pbind(
+					var pattern = Pbind(            // I think stream ends early based on some arrays being empty/nil/smaller?
 						\type,\midi,
 						\midiout,midiOut,
 						\dur,Pseq( times ),
@@ -99,10 +99,17 @@ KemperMIDI {
 						\chan,Pseq( chans ),   // 0-15
 
 						\nums, Pseq( nums ),
-						\progNum, Pkey(\nums),
-						\ctlNum, Pkey(\nums),
-						\control, Pkey( vals ),
-						\dummy,Pfunc({|e| e.postln })
+						\vals, Pseq( vals ),
+						\dummy, Pfunc({ |event|
+							if(event['midicmd'] == 'program',{
+								event.put('progNum',event['nums']);
+							},{
+								event.put('ctlNum',event['nums']);
+								event.put('control',event['vals']);
+							});
+
+							event.postln;    // can eventaully remove
+						})
 					);
 					cues[uniqueKey].put('pattern',pattern)
 				})

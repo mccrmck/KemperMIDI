@@ -21,7 +21,7 @@ c = x.collect({ |event| event[3] });
 d  = x.collect({ |event| event[4] });
 e  = x.collect({ |event| event[5] });
 
-
+b[0] == 'control'
 
 ////
 
@@ -58,7 +58,19 @@ Server.default.options.device = "Saffire"
 
 KemperMIDI.cues['fourBeginning'].pattern.asStream.next(())
 
-Ptrace(g).play
+
+Pbind(
+	\type,\midi,
+	\midiout,midiOut,
+	\dur,Pseq( times ),
+	\midicmd, Pseq( cmds ),
+	\chan,Pseq( chans ),   // 0-15
+
+	\nums, Pseq( nums ),
+	\progNum, Pkey(\nums),
+	\ctlNum, Pkey(\nums),
+	\control, Pkey( vals ),
+);
 
 
 a = YAWNSong('numberFour').cueFrom('fourBeginning','fourBeginning',true,false, true)
@@ -66,8 +78,24 @@ a
 a.play
 a.stop
 
+(
+p = Pbind(
+	\nums, Pseq( (0..5) ),
+	\numz, Pseq( (2,4..12)),
 
+	\dummy, Pfunc({ |event|
+		if(event['nums'].even,{
+			event.put('progNum',event['nums']);
+		},{
+			event.put('ctlNum',event['nums']);
+			event.put('control',event['numz']);
+		});
 
+		event.postln;
+	}),
+).play
+
+)
 
 Pdef('fourBeginning').stop
 
