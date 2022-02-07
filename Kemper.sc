@@ -19,7 +19,6 @@ KemperMIDI {
 			server.sync;
 			MIDIClient.destinations.do({ |source|
 				if(source.device == device,{ port = source.name.asString });
-
 			});
 
 			midiOut = MIDIOut.newByName(device,port);
@@ -42,7 +41,7 @@ KemperMIDI {
 				cmds  = file.collect({ |event| event = event.replace(\cc,'control'); event[2] });
 				chans = file.collect({ |event| event[3] });
 				nums  = file.collect({ |event| event[4] });
-				vals  = file.collect({ |event| event[5] });
+				vals  = file.collect({ |event| event[5] ? 0 });
 
 			},{
 				bool = times = cmds = chans = nums = vals = [ nil ];
