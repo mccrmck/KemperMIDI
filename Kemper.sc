@@ -90,7 +90,7 @@ KemperMIDI {
 				if(loopKey.notNil,{
 					"hahahaha".postln;
 				},{
-					var pattern = Pbind(            // I think stream ends early based on some arrays being empty/nil/smaller?
+					var pattern = Pbind(
 						\type,\midi,
 						\midiout,midiOut,
 						\dur,Pseq( times ),
@@ -106,15 +106,13 @@ KemperMIDI {
 								event.put('ctlNum',event['nums']);
 								event.put('control',event['vals']);
 							});
-
-							event.postln;    // can eventaully remove
 						})
 					);
 					cues[uniqueKey].put('pattern',pattern)
 				})
 			},{
 				var pattern = Pbind(
-					\dur,Pseq([0],1), // eventually has to be a proper delta
+					\dur,Pseq([0],1),
 					\note, Rest(0.01)
 				);
 				cues[uniqueKey].put('pattern',pattern)
@@ -126,4 +124,3 @@ KemperMIDI {
 		^cues[uniqueKey]['pattern']
 	}
 }
-
