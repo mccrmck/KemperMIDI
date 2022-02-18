@@ -118,7 +118,7 @@ KemperMIDI {
 				cues[uniqueKey].put('pattern',pattern)
 			});
 		},{
-			"MIDIClient not initialized".throw;
+			"MIDIClient not initialized, KemperMIDI not loaded".postln;
 		});
 
 		^cues[uniqueKey]['pattern']
