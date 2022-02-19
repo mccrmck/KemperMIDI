@@ -6,21 +6,18 @@ KemperMIDI {
 		cues = IdentityDictionary();
 	}
 
-	*new { | device |
-		^super.new.init(device);
+	*new { | device, port |
+		^super.new.init(device, port);
 	}
 
-	init { | device |
-		var port, server = Server.default;
+	init { | device, port |
+		var server = Server.default;
 		device = device.asString;
+		port = port.asString;
 
 		Routine({
 			MIDIClient.init;
 			server.sync;
-			MIDIClient.destinations.do({ |source|
-				if(source.device == device,{ port = source.name.asString });
-			});
-
 			midiOut = MIDIOut.newByName(device,port);
 		}).play;
 	}
@@ -37,7 +34,7 @@ KemperMIDI {
 
 			if(file.size > 0,{
 				bool  = [1];
-				times = file.collect({ |event| event[1] }).differentiate.drop(1);
+				times = file.collect({ |event| event[1] }).differentiate.rotate(-1);
 				cmds  = file.collect({ |event| event = event.replace(\cc,'control'); event[2] });
 				chans = file.collect({ |event| event[3] });
 				nums  = file.collect({ |event| event[4] });
@@ -88,14 +85,32 @@ KemperMIDI {
 				var vals  = cues[uniqueKey]['vals'];
 
 				if(loopKey.notNil,{
-					"hahahaha".postln;
+					var pattern = Pbind(
+						\type,\midi,
+						\midiout,midiOut,
+						\dur, Pseq( times ),
+						\midicmd, Pwhile({ cues[uniqueKey].at(loopKey.asSymbol) }, Pseq( cmds ) ) ,
+						\chan, Pseq( chans ),   // 0-15
+
+						\nums, Pseq( nums ),
+						\vals, Pseq( vals ),
+						\dummy, Pfunc({ |event|
+							if(event['midicmd'] == 'program',{
+								event.put('progNum',event['nums']);
+							},{
+								event.put('ctlNum',event['nums']);
+								event.put('control',event['vals']);
+							});
+						})
+					);
+					cues[uniqueKey].put('pattern',pattern)
 				},{
 					var pattern = Pbind(
 						\type,\midi,
 						\midiout,midiOut,
-						\dur,Pseq( times ),
+						\dur, Pseq( times ),
 						\midicmd, Pseq( cmds ),
-						\chan,Pseq( chans ),   // 0-15
+						\chan, Pseq( chans ),   // 0-15
 
 						\nums, Pseq( nums ),
 						\vals, Pseq( vals ),
