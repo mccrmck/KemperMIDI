@@ -34,7 +34,7 @@ KemperMIDI {
 
 			if(file.size > 0,{
 				bool  = [1];
-				times = file.collect({ |event| event[1] }).differentiate.rotate(-1);
+				times = file.collect({ |event| event[1] }).differentiate.add(0.0);
 				cmds  = file.collect({ |event| event = event.replace(\cc,'control'); event[2] });
 				chans = file.collect({ |event| event[3] });
 				nums  = file.collect({ |event| event[4] });
@@ -85,44 +85,56 @@ KemperMIDI {
 				var vals  = cues[uniqueKey]['vals'];
 
 				if(loopKey.notNil,{
-					var pattern = Pbind(
-						\type,\midi,
-						\midiout,midiOut,
-						\dur, Pseq( times ),
-						\midicmd, Pwhile({ cues[uniqueKey].at(loopKey.asSymbol) }, Pseq( cmds ) ) ,
-						\chan, Pseq( chans ),   // 0-15
+					var pattern = Pseq([
+						Pbind(
+							\dur, Pseq([times[0]]),
+							\note, Rest()
+						),
+						Pbind(
+							\type,\midi,
+							\midiout,midiOut,
+							\dur, Pseq( times ),
+							\midicmd, Pwhile({ cues[uniqueKey].at(loopKey.asSymbol) }, Pseq( cmds ) ) ,
+							\chan, Pseq( chans ),   // 0-15
 
-						\nums, Pseq( nums ),
-						\vals, Pseq( vals ),
-						\dummy, Pfunc({ |event|
-							if(event['midicmd'] == 'program',{
-								event.put('progNum',event['nums']);
-							},{
-								event.put('ctlNum',event['nums']);
-								event.put('control',event['vals']);
-							});
-						})
-					);
+							\nums, Pseq( nums ),
+							\vals, Pseq( vals ),
+							\dummy, Pfunc({ |event|
+								if(event['midicmd'] == 'program',{
+									event.put('progNum',event['nums']);
+								},{
+									event.put('ctlNum',event['nums']);
+									event.put('control',event['vals']);
+								});
+							})
+						)
+					]);
 					cues[uniqueKey].put('pattern',pattern)
 				},{
-					var pattern = Pbind(
-						\type,\midi,
-						\midiout,midiOut,
-						\dur, Pseq( times ),
-						\midicmd, Pseq( cmds ),
-						\chan, Pseq( chans ),   // 0-15
+					var pattern = Pseq([
+						Pbind(
+							\dur, Pseq([times[0]]),
+							\note, Rest()
+						),
+						Pbind(
+							\type,\midi,
+							\midiout,midiOut,
+							\dur, Pseq( times[1..] ),
+							\midicmd, Pseq( cmds ),
+							\chan, Pseq( chans ),   // 0-15
 
-						\nums, Pseq( nums ),
-						\vals, Pseq( vals ),
-						\dummy, Pfunc({ |event|
-							if(event['midicmd'] == 'program',{
-								event.put('progNum',event['nums']);
-							},{
-								event.put('ctlNum',event['nums']);
-								event.put('control',event['vals']);
-							});
-						})
-					);
+							\nums, Pseq( nums ),
+							\vals, Pseq( vals ),
+							\dummy, Pfunc({ |event|
+								if(event['midicmd'] == 'program',{
+									event.put('progNum',event['nums']);
+								},{
+									event.put('ctlNum',event['nums']);
+									event.put('control',event['vals']);
+								});
+							})
+						)
+					]);
 					cues[uniqueKey].put('pattern',pattern)
 				})
 			},{
