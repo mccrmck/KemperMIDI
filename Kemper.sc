@@ -93,7 +93,7 @@ KemperMIDI {
 						Pbind(
 							\type,\midi,
 							\midiout,midiOut,
-							\dur, Pseq( times ),
+							\dur, Pseq( times[1..] ),
 							\midicmd, Pwhile({ cues[uniqueKey].at(loopKey.asSymbol) }, Pseq( cmds ) ) ,
 							\chan, Pseq( chans ),   // 0-15
 
