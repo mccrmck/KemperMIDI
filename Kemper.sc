@@ -1,9 +1,10 @@
 KemperMIDI {
 
-	classvar <cues, <>midiOut;
+	classvar <cues, <loopCues, <>midiOut;
 
 	*initClass {
 		cues = IdentityDictionary();
+		loopCues = IdentityDictionary();
 	}
 
 	*new { | device, port |
@@ -22,7 +23,7 @@ KemperMIDI {
 		}).play;
 	}
 
-	*loadFromMIDI { |key, path, loopKey|
+	*loadFromMIDI { |key, path, loop = false|
 		var pathToMIDI = path.asString;
 
 		if( pathToMIDI.extension == "mid",{
@@ -39,7 +40,6 @@ KemperMIDI {
 				chans = file.collect({ |event| event[3] });
 				nums  = file.collect({ |event| event[4] });
 				vals  = file.collect({ |event| event[5] ? 0 });
-
 			},{
 				bool = times = cmds = chans = nums = vals = [ nil ];
 			});
@@ -55,7 +55,7 @@ KemperMIDI {
 				)
 			);
 
-			if( loopKey.notNil,{ cues[key.asSymbol].put(loopKey.asSymbol, true) });
+			if( loop ,{ loopCues.put(key.asSymbol, true) });
 		},{
 			"bad path, must be a .mid file!".throw;
 		});
@@ -63,16 +63,16 @@ KemperMIDI {
 		^cues.at(key)
 	}
 
-	*makePat { |key, path = nil, loopKey|
+	*makePat { |key, path = nil, loop = false|
 		var uniqueKey = key.asSymbol;
 
 		if(path.isNil,{
 			if(cues[uniqueKey].isNil,{
 				"no file loaded".throw;
 			});
-			loopKey = cues[uniqueKey].findKeyForValue(true);        // this doesn't seem that strong, could improve!
+			loop = loopCues[uniqueKey];
 		},{
-			this.loadFromMIDI(uniqueKey, path, loopKey);
+			this.loadFromMIDI(uniqueKey, path, loop);
 		});
 
 		if( MIDIClient.initialized,{
@@ -84,59 +84,36 @@ KemperMIDI {
 				var nums  = cues[uniqueKey]['nums'];
 				var vals  = cues[uniqueKey]['vals'];
 
-				if(loopKey.notNil,{
-					var pattern = Pseq([
-						Pbind(
-							\dur, Pseq([times[0]]),
-							\note, Rest()
-						),
-						Pbind(
-							\type,\midi,
-							\midiout,midiOut,
-							\dur, Pseq( times[1..] ),
-							\midicmd, Pwhile({ cues[uniqueKey].at(loopKey.asSymbol) }, Pseq( cmds ) ) ,
-							\chan, Pseq( chans ),   // 0-15
+				var pattern = Pseq([
+					Pbind(
+						\dur, Pseq([ times[0] ]),
+						\note, Rest()
+					),
+					Pbind(
+						\type,\midi,
+						\midiout,midiOut,
+						\dur, Pseq( times[1..] ),
+						\midicmd, Pseq( cmds ),
+						\chan, Pseq( chans ),   // 0-15
 
-							\nums, Pseq( nums ),
-							\vals, Pseq( vals ),
-							\dummy, Pfunc({ |event|
-								if(event['midicmd'] == 'program',{
-									event.put('progNum',event['nums']);
-								},{
-									event.put('ctlNum',event['nums']);
-									event.put('control',event['vals']);
-								});
-							})
-						)
-					]);
-					cues[uniqueKey].put('pattern',pattern)
-				},{
-					var pattern = Pseq([
-						Pbind(
-							\dur, Pseq([times[0]]),
-							\note, Rest()
-						),
-						Pbind(
-							\type,\midi,
-							\midiout,midiOut,
-							\dur, Pseq( times[1..] ),
-							\midicmd, Pseq( cmds ),
-							\chan, Pseq( chans ),   // 0-15
+						\nums, Pseq( nums ),
+						\vals, Pseq( vals ),
+						\dummy, Pfunc({ |event|
+							if(event['midicmd'] == 'program',{
+								event.put('progNum',event['nums']);
+							},{
+								event.put('ctlNum',event['nums']);
+								event.put('control',event['vals']);
+							});
+						})
+					)
+				]);
 
-							\nums, Pseq( nums ),
-							\vals, Pseq( vals ),
-							\dummy, Pfunc({ |event|
-								if(event['midicmd'] == 'program',{
-									event.put('progNum',event['nums']);
-								},{
-									event.put('ctlNum',event['nums']);
-									event.put('control',event['vals']);
-								});
-							})
-						)
-					]);
-					cues[uniqueKey].put('pattern',pattern)
-				})
+				if(loop,{
+					pattern = Pwhile({ loopCues.at(uniqueKey.asSymbol) }, pattern )
+				});
+
+				cues[uniqueKey].put('pattern',pattern)
 			},{
 				var pattern = Pbind(
 					\dur,Pseq([0],1),
