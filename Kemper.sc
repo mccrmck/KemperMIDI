@@ -109,9 +109,7 @@ KemperMIDI {
 					)
 				]);
 
-				if(loop,{
-					pattern = Pwhile({ loopCues.at(uniqueKey.asSymbol) }, pattern )
-				});
+				if(loop,{ pattern = Pwhile({ loopCues.at(uniqueKey.asSymbol) }, pattern ) });
 
 				cues[uniqueKey].put('pattern',pattern)
 			},{
