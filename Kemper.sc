@@ -12,15 +12,13 @@ KemperMIDI {
 	}
 
 	init { | device, port |
-		var server = Server.default;
-		device = device.asString;
-		port = port.asString;
+		var cond = CondVar();
 
-		Routine({
+		fork {
 			MIDIClient.init;
-			server.sync;
-			midiOut = MIDIOut.newByName(device,port);
-		}).play;
+			cond.wait({ MIDIClient.initialized });
+			midiOut = MIDIOut.newByName(device.asString,port.asString);
+		};
 	}
 
 	*loadFromMIDI { |key, path, loop = false|
