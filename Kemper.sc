@@ -7,11 +7,11 @@ KemperMIDI {
 		loopCues = IdentityDictionary();
 	}
 
-	*new { | device, port |
+	*new { |device, port|
 		^super.new.init(device, port);
 	}
 
-	init { | device, port |
+	init { |device, port|
 		var cond = CondVar();
 
 		fork {
