@@ -33,13 +33,13 @@ KemperMIDI {
 
 			if(file.size > 0,{
 				bool  = [1];
-				times = file.collect({ |event| event[1] }).differentiate.add(0.0);
+				times = file.collect({ |event| event[1] }).differentiate.add(0);
 				cmds  = file.collect({ |event| event = event.replace(\cc,'control'); event[2] });
 				chans = file.collect({ |event| event[3] });
 				nums  = file.collect({ |event| event[4] });
 				vals  = file.collect({ |event| event[5] ? 0 });
 			},{
-				bool = times = cmds = chans = nums = vals = [ nil ];
+				bool = times = cmds = chans = nums = vals = [ nil ];                          // do I still need this? w/ the new Ppar setup in YAWN.sc, this may not be necessary!
 			});
 
 			cues.put(key.asSymbol,
@@ -53,7 +53,7 @@ KemperMIDI {
 				)
 			);
 
-			if( loop ,{ loopCues.put(key.asSymbol, true) });
+			if(loop, { loopCues.put(key.asSymbol, true) });
 		},{
 			"bad path, must be a .mid file!".throw;
 		});
