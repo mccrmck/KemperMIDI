@@ -39,7 +39,7 @@ KemperMIDI {
 				nums  = file.collect({ |event| event[4] });
 				vals  = file.collect({ |event| event[5] ? 0 });
 			},{
-				bool = times = cmds = chans = nums = vals = [ nil ];                          // do I still need this? w/ the new Ppar setup in YAWN.sc, this may not be necessary!
+				bool = times = cmds = chans = nums = vals = [ nil ];        // do I still need this? w/ the new Ppar setup in YAWN.sc, this may not be necessary!
 			});
 
 			cues.put(key.asSymbol,
