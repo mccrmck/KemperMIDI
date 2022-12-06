@@ -73,52 +73,47 @@ KemperMIDI {
 			this.loadFromMIDI(uniqueKey, path, loop);
 		});
 
-		if( MIDIClient.initialized,{
+		if( cues[uniqueKey]['bool'],{
+			var times = cues[uniqueKey]['times'];
+			var cmds  = cues[uniqueKey]['cmds'];
+			var chans = cues[uniqueKey]['chans'];
+			var nums  = cues[uniqueKey]['nums'];
+			var vals  = cues[uniqueKey]['vals'];
 
-			if( cues[uniqueKey]['bool'],{
-				var times = cues[uniqueKey]['times'];
-				var cmds  = cues[uniqueKey]['cmds'];
-				var chans = cues[uniqueKey]['chans'];
-				var nums  = cues[uniqueKey]['nums'];
-				var vals  = cues[uniqueKey]['vals'];
+			var pattern = Pseq([
+				Pbind(
+					\dur, Pseq([ times[0] ]),
+					\note, Rest()
+				),
+				Pbind(
+					\type,\midi,
+					\midiout,midiOut,
+					\dur, Pseq( times[1..] ),
+					\midicmd, Pseq( cmds ),
+					\chan, Pseq( chans ),   // 0-15
 
-				var pattern = Pseq([
-					Pbind(
-						\dur, Pseq([ times[0] ]),
-						\note, Rest()
-					),
-					Pbind(
-						\type,\midi,
-						\midiout,midiOut,
-						\dur, Pseq( times[1..] ),
-						\midicmd, Pseq( cmds ),
-						\chan, Pseq( chans ),   // 0-15
+					\nums, Pseq( nums ),
+					\vals, Pseq( vals ),
+					\dummy, Pfunc({ |event|
+						if(event['midicmd'] == 'program',{
+							event.put('progNum',event['nums']);
+						},{
+							event.put('ctlNum',event['nums']);
+							event.put('control',event['vals']);
+						});
+					})
+				)
+			]);
 
-						\nums, Pseq( nums ),
-						\vals, Pseq( vals ),
-						\dummy, Pfunc({ |event|
-							if(event['midicmd'] == 'program',{
-								event.put('progNum',event['nums']);
-							},{
-								event.put('ctlNum',event['nums']);
-								event.put('control',event['vals']);
-							});
-						})
-					)
-				]);
+			if(loop,{ pattern = Pwhile({ loopCues.at(uniqueKey.asSymbol) }, pattern ) });
 
-				if(loop,{ pattern = Pwhile({ loopCues.at(uniqueKey.asSymbol) }, pattern ) });
-
-				cues[uniqueKey].put('pattern',pattern)
-			},{
-				var pattern = Pbind(
-					\dur,Pseq([0],1),
-					\note, Rest(0.01)
-				);
-				cues[uniqueKey].put('pattern',pattern)
-			});
+			cues[uniqueKey].put('pattern',pattern)
 		},{
-			"MIDIClient not initialized, KemperMIDI not loaded".postln;
+			var pattern = Pbind(
+				\dur,Pseq([ 0 ]),
+				\note, Rest(0.01)
+			);
+			cues[uniqueKey].put('pattern',pattern)
 		});
 
 		^cues[uniqueKey]['pattern']
