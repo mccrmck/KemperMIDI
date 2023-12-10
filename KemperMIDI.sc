@@ -100,7 +100,7 @@ KemperMIDI {
 			distortionTone: 17,
 			reverbMidFrequency: 17,
 			fuzzOcta: 18,
-			CompressorIntensity: 18,
+			compressorIntensity: 18,
 			noiseGateThreshold: 18,
 			autoSwellCompressor: 18,
 			compressorAttack: 19,
