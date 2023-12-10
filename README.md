@@ -1,6 +1,6 @@
 # KemperMIDI
 
-A SuperCollider class for sending 14-bit MIDI to ,
+A SuperCollider class for sending 14-bit MIDI to control the [Kemper](https://www.kemper-amps.com) digital guitar amplifer.
 
 Details about how the Kemper receives MIDI, relevant integers for the Address Pages / Address Numbers, and for a list of the available parameters can be found in the attached MIDI Parameter Documentation 8.6 (downloaded [here](https://www.kemper-amps.com/downloads/5/User-Manuals))
 
