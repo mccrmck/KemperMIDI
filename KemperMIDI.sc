@@ -71,10 +71,9 @@ KemperMIDI {
 
 	prNumCheck { |addrPg, addrNum|
 		var page = addrPgKeys.findKeyForValue(addrPg);
-		var num = addrNrKeys[page][ addrNum ] ?? { "key not found in this page".throw };
 		^case
 		{ addrNum.isKindOf( Integer ) }{ addrNum }
-		{ addrNum.isKindOf( Symbol ) }{ num }
+		{ addrNum.isKindOf( Symbol ) }{ addrNrKeys[page][ addrNum ] ?? { "key not found in this page".throw } }
 		{ "val must be an Integer or a Symbol".throw };
 	}
 
