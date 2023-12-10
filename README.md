@@ -11,7 +11,7 @@ Basic usage:
 k = KemperMIDI( "UM-ONE", "UM-ONE", 2 ) // MIDI device, MIDI port, channel
 
 // set a parameter using integers, symbols, or hex notation
-k.set( 4, 3, 0.2 )
+k.set( 4, 0x03, 0.2 )
 
 // ...which is equivalent to:
 k.set( \rig, \panorama, 0.2 )
