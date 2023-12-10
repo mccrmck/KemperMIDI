@@ -1,4 +1,4 @@
-KemperMIDINew {
+KemperMIDI {
 
 	classvar <addrPgKeys, <addrNrKeys;
 	var <>chan, <>midiOut;
