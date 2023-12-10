@@ -20,7 +20,7 @@ k.set( \rig, \panorama, 0.2 )
 k.switch( \cabinet, \onOff, 0 )
 
 // effects can be added using the codes found in the above documentation:
-// note: this interface will change evenutally so symbols can be used instead of integers for MSB and LSB
+// this interface will change evenutally to accommodate symbols instead of integers for MSB and LSB
 k.fxType( \effectModD, 0, 81  ) // will add a phaser to effects module D
 ```
 
