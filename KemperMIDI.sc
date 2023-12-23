@@ -1,6 +1,6 @@
 KemperMIDI {
 
-	classvar <addrPgKeys, <addrNrKeys, <fxeys;
+	classvar <addrPgKeys, <addrNrKeys, <fxKeys;
 	var <>chan, <>midiOut;
 
 	*new { |device, port, chan = 1|
@@ -50,14 +50,15 @@ KemperMIDI {
 		midiOut.sysex( pkt.as( Int8Array ) );
 	}
 
-	fxType { |addrPg, msb, lsb|
+	fxType { |addrPg, fxKey|
 		var page = this.prPageCheck( addrPg );
 		var chn = (chan - 1) + 0xB0;
+        var fxBits = fxKeys[ fxKey.asSymbol ];
 		var pkt = [
 			chn, 0x63, page,
 			chn, 0x62, 0x00,
-			chn, 0x06, msb,
-			chn, 0x26, lsb,
+			chn, 0x06, fxBits[0],
+			chn, 0x26, fxBits[1],
 		];
 		midiOut.sysex( pkt.as( Int8Array ) );
 	}
@@ -430,7 +431,7 @@ KemperMIDI {
 			),
 		);
 
-		fxeys = (
+		fxKeys = (
 			empty:             [0, 0],
 			wahWah:            [0, 1],
 			wahLowPass:        [0, 2],
@@ -520,6 +521,59 @@ KemperMIDI {
 			formantReverb:     [1,54],
 			ionosphereReverb:  [1,55],
 			springReverb:      [1,65],
-		)
-	}
+		);
+        
+        // let's add some events while we're at it
+        Event.addEventType(\kemperSet,{
+            if(~kemperMIDI == -1,{
+                "no KemperMIDI instance specified".error;
+            },{
+                var kMIDI = ~kemperMIDI;
+            	var page = kMIDI.prPageCheck( ~addrPg );
+	            var num  = kMIDI.prNumCheck( page, ~addrNr );
+            	var chan = kMIDI.chan - 1 + 0xB0;
+            	var scale = (~val * (16384 - 1)).asInteger;
+            	var msb = (scale >> 7) & 0x7F;
+            	var lsb = scale        & 0x7F;
+            	var pkt = [
+            		chan, 0x63, page,
+            		chan, 0x62, num,
+                    chan, 0x06, msb,
+            		chan, 0x26, lsb,
+            	];
+
+                kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
+            });
+        },(
+            kemperMIDI: -1,
+        	addrPg: 4,
+            addrNr: 1,
+            val: 0.5
+        ));
+
+        Event.addEventType(\kemperSwitch,{
+            if(~kemperMIDI == -1,{
+                "no KemperMIDI instance specified ".error;
+            },{
+                var kMIDI = ~kemperMIDI;
+            	var page = kMIDI.prPageCheck( ~addrPg );
+            	var num  = kMIDI.prNumCheck( page, ~addrNr );
+            	var chn = kMIDI.chan - 1 + 0xB0;
+            	var val = ~val.round.clip(0,1).asInteger; 
+            	var pkt = [
+            		chn, 0x63, page,
+            		chn, 0x62, num,
+            		chn, 0x06, 0x00,
+            		chn, 0x26, val,
+            	];
+            
+            	kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
+            }); 
+        },(
+            kemperMIDI: -1,
+        	addrPg: 4,
+        	addrNr: 1,
+        	val: 0,
+        ));
+    }
 }
