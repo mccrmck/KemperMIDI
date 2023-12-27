@@ -44,3 +44,15 @@ Pbind(
 ).play
 )
 ```
+
+## TO-DO
+- [ ] test all parameters
+- [ ] scale/clip those parameters that have weird ranges (see transpose, for example)
+- [ ] decipher comments copied directly from the docs, translate into something meaningful
+- [ ] GUI? maybe at least some sort of visual aid for choosing parameters
+- [ ] some way to filter relevant addrNr keys for a given addrPg key?
+- [ ] \fxType `Event` key could be cool - must test hardware + MIDI latency
+- [ ] arg names for instance methods: is addrPg, addrNr ideal? It's supposed to match the docs, but maybe I make my own docs that are more user-friendly?
+- [ ] third argument to .fxType(\addrPg, \fxType, startActive: true) ?
+
+Feel free to open an issue/PR if I'm missing something obvious!
