@@ -50,8 +50,8 @@ KemperMIDI {
 		midiOut.sysex( pkt.as( Int8Array ) );
 	}
 
-	fxType { |addrPg, fxKey|
-		var page = this.prPageCheck( addrPg );
+	fxType { |addrPg, fxKey|                      // consider adding startOn: true
+		var page = this.prPageCheck( addrPg );    // this could make sense probably
 		var chn = (chan - 1) + 0xB0;
         var fxBits = fxKeys[ fxKey.asSymbol ];
 		var pkt = [
@@ -67,15 +67,15 @@ KemperMIDI {
 		^case
 		{ addrPg.isKindOf( Integer ) }{ addrPg }
 		{ addrPg.isKindOf( Symbol ) }{ addrPgKeys[ addrPg ] }
-		{ "val must be an Integer or a Symbol".throw };
+		{ "addPg must be an Integer or a Symbol".throw };
 	}
 
 	prNumCheck { |addrPg, addrNum|
 		var page = addrPgKeys.findKeyForValue(addrPg);
 		^case
 		{ addrNum.isKindOf( Integer ) }{ addrNum }
-		{ addrNum.isKindOf( Symbol ) }{ addrNrKeys[page][ addrNum ] ?? { "key not found in this page".throw } }
-		{ "val must be an Integer or a Symbol".throw };
+		{ addrNum.isKindOf( Symbol ) }{ addrNrKeys[page][ addrNum ] ?? { "addrNum not found on this page".throw } }
+		{ "addNum must be an Integer or a Symbol".throw };
 	}
 
 	*initClass {
@@ -273,7 +273,7 @@ KemperMIDI {
 			smear: 108,
 			duckingPrePost: 109,
 		);
-
+}
 		addrPgKeys = (
 			rig: 4,
 			inputSection: 9,
@@ -295,41 +295,41 @@ KemperMIDI {
 
 		addrNrKeys = (
 			rig: (
-				tempoBpm: 0,
-				rigVolume: 1,
-				tempoEnable: 2,
-				panorama: 3,
-				transpose: 4,  // "range 28-100"
+				tempoBpm:            0,
+				rigVolume:           1,
+				tempoEnable:         2,
+				panorama:            3,
+				transpose:           4,   // "range 28-100"
 				volumePedalLocation: 68,  // "values 0-4 in selection order"?
-				volumePedalRange: 69,
-				parallelPathEnable: 71,
-				parallelPathMix: 72,
-				rigSpilloverOff: 73,
-				dlyRevRouting: 74,
+				volumePedalRange:    69,
+				parallelPathEnable:  71,
+				parallelPathMix:     72,
+				rigSpilloverOff:     73,
+				dlyRevRouting:       74,
 			),
 			inputSection: (
 				noiseGateIntensity: 3,
-				cleanSense: 4,
-				distortionSense: 5,
+				cleanSense:         4,
+				distortionSense:    5,
 			),
 			amplifier: (
-				onOff: 2,
-				ampVolume: 3,
-				gain: 4,
-				definition: 6,
-				clarity: 7,
+				onOff:        2,
+				ampVolume:    3,
+				gain:         4,
+				definition:   6,
+				clarity:      7,
 				powerSagging: 8,
-				pick: 9,
-				compressor: 10,
-				tubeShape: 11,
-				tubeBias: 12,
-				directMix: 15
+				pick:         9,
+				compressor:   10,
+				tubeShape:    11,
+				tubeBias:     12,
+				directMix:    15
 			),
 			equalizer: (
-				bass: 4,
-				middle: 5,
-				treble: 6,
-				presence: 7,
+				bass:            4,
+				middle:          5,
+				treble:          6,
+				presence:        7,
 				positionPrePost: 8,
 			),
 			cabinet: (
@@ -349,47 +349,47 @@ KemperMIDI {
 			effectModDLY: fxAddr,
 			effectModREV: fxAddr,
 			userScales: (                    // All User Scale steps have value range 26 – 99.
-				scale1_0: 0,
-				scale1_1: 1,
-				scale1_2: 2,
-				scale1_3: 3,
-				scale1_4: 4,
-				scale1_5: 5,
-				scale1_6: 6,
-				scale1_7: 7,
-				scale1_8: 8,
-				scale1_9: 9,
+				scale1_0:  0,
+				scale1_1:  1,
+				scale1_2:  2,
+				scale1_3:  3,
+				scale1_4:  4,
+				scale1_5:  5,
+				scale1_6:  6,
+				scale1_7:  7,
+				scale1_8:  8,
+				scale1_9:  9,
 				scale1_10: 10,
 				scale1_11: 11,
-				scale2_0: 0,
-				scale2_1: 1,
-				scale2_2: 2,
-				scale2_3: 3,
-				scale2_4: 4,
-				scale2_5: 5,
-				scale2_6: 6,
-				scale2_7: 7,
-				scale2_8: 8,
-				scale2_9: 9,
-				scale2_10: 10,
-				scale2_11: 11,
+				scale2_0:  12,
+				scale2_1:  13,
+				scale2_2:  14,
+				scale2_3:  15,
+				scale2_4:  16,
+				scale2_5:  17,
+				scale2_6:  18,
+				scale2_7:  19,
+				scale2_8:  20,
+				scale2_9:  21,
+				scale2_10: 22,
+				scale2_11: 23,
 			)
 			looperAndModFreeze: (
-				looperRecord: 88,
-				looperPlayback: 88,
-				looperOverdub: 88,
-				looperStop: 89,
-				looperTrigger: 90,
-				looperReverse: 91,
-				looperHalfSpeed: 92,
-				looperCancel: 93,
-				reactivateOverdub: 93,
-				looperEraseLoop: 94,
-				effectModAFreeze: 107,
-				effectModBFreeze: 108,
-				effectModCFreeze: 109,
-				effectModDFreeze: 110,
-				effectModXFreeze: 111,
+				looperRecord:       88,
+				looperPlayback:     88,
+				looperOverdub:      88,
+				looperStop:         89,
+				looperTrigger:      90,
+				looperReverse:      91,
+				looperHalfSpeed:    92,
+				looperCancel:       93,
+				reactivateOverdub:  93,
+				looperEraseLoop:    94,
+				effectModAFreeze:   107,
+				effectModBFreeze:   108,
+				effectModCFreeze:   109,
+				effectModDFreeze:   110,
+				effectModXFreeze:   111,
 				effectModMODFreeze: 113,
 				effectModDLYFreeze: 114,
 				effectModREVFreeze: 115,

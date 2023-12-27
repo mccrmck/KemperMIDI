@@ -2,7 +2,10 @@
 k = KemperMIDI("IAC Driver", "Bus 1");
 k = KemperMIDI("MIDI Monitor (Untitled)", "MIDI Monitor (Untitled)");
 
-k = KemperMIDI("SuperCollider","in0");
+k = KemperMIDI("Midi Through","Midi Through Port-0")
+
+MIDIClient.destinations.do(_.postln)
+
 
 (
 Event.addEventType(\kemperSwitch,{
@@ -20,6 +23,7 @@ Event.addEventType(\kemperSwitch,{
     		chn, 0x06, 0x00,
     		chn, 0x26, val,
     	];
+        pkt.postln;
     
     	kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
     }); 
@@ -36,11 +40,13 @@ Event.addEventType(\kemperSwitch,{
 (
 Pbind(
     \type,\kemperSet,
-    \dur,Pseq([0.2],2),
+    \dur,0.01,
     \kemperMIDI,k,
-    \val,Pseq([0.1,0.4,0.8,1.0])
-).trace.play
+    \val,Pseg([0,1],[30]),
+    \addrPg,\rig,
+    \addrNr,\transpose,
+).play
 )
 
-
+k.set(40,4,0.5)
 
