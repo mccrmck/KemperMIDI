@@ -17,7 +17,6 @@ k.set( 4, 0x03, 0.2 ) // args: addrPg, addrNr, val (0-1)
 
 // ...or symbols for the addPg and addNr arguments
 k.set( \rig, \panorama, 0.2 )
-
 ```
 For "Switch Parameters":
 ```
@@ -28,10 +27,11 @@ To switch effects (instead of using addrNr: 0):
 ```
 k.fxType( \effectModD, \phaser )
 ```
-Please check the documentation/class file for valid argument keys (they're case-sensitive)
-***
+Please check the documentation and/or class file for valid argument keys (they're case-sensitive)
 
-This class also adds two `Event` types: `\kemperSet` and `\kemperSwitch` which receive keys that match their respective method arguments:
+## Events
+
+This class also adds three `Event` types: `\kemperSet`, `\kemperSwitch`, and `\kemperFxType` which receive keys matching their respective method arguments:
 ```
 (
 Pbind(
@@ -42,16 +42,28 @@ Pbind(
     \addrNr,\gain,
     \val,Pseg([0,1],[30]),
 ).play
-)
+);
+
+// after pushing this commit I realized that this event doesn't turn the new fxType *on*,
+// which isn't terribly practical...I have to figure that out!
+// (
+// Pbind(
+// \type,\kemperFxType,
+// \dur,0.5,
+// \kemperMIDI,k, // a KemperMIDI instance must be included!
+// \addrPg, \effectModA,
+// \fxKey, Pseq([ \wahWah, \quadDelay ],inf),
+// ).play
+// )
 ```
 
-## TO-DO
+### TO-DO
 - [ ] test all parameters
 - [ ] scale/clip those parameters that have weird ranges (see transpose, for example)
 - [ ] decipher comments copied directly from the docs, translate into something meaningful
 - [ ] GUI? maybe at least some sort of visual aid for choosing parameters
 - [ ] some way to filter relevant addrNr keys for a given addrPg key?
-- [ ] \fxType `Event` key could be cool - must test hardware + MIDI latency
+- [ ] must test hardware + MIDI latency (especially for \kemperFxType)
 - [ ] arg names for instance methods: is addrPg, addrNr ideal? It's supposed to match the docs, but maybe I make my own docs that are more user-friendly?
 - [ ] third argument to .fxType(\addrPg, \fxType, startActive: true) ?
 
