@@ -578,7 +578,7 @@ KemperMIDI {
         	val: 0,
         ));
 
-        Event.addEventType(\kemperFxType,
+        Event.addEventType(\kemperFxType,{
             if(~kemperMIDI == -1,{
                 "no KemperMIDI instance specified ".error;
             },{
