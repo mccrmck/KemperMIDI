@@ -8,45 +8,40 @@ MIDIClient.destinations.do(_.postln)
 
 
 (
-Event.addEventType(\kemperSwitch,{
+Event.addEventType(\kemperFxType,{
 	if(~kemperMIDI == -1,{
         "no KemperMIDI instance specified ".error;
     },{
         var kMIDI = ~kemperMIDI;
     	var page = kMIDI.prPageCheck( ~addrPg );
-    	var num  = kMIDI.prNumCheck( page, ~addrNr );
+        var fxBits = KemperMIDI.fxKeys[ ~fxKey ];
     	var chn = kMIDI.chan - 1 + 0xB0;
-    	var val = ~val.round.clip(0,1).asInteger; 
     	var pkt = [
     		chn, 0x63, page,
-    		chn, 0x62, num,
-    		chn, 0x06, 0x00,
-    		chn, 0x26, val,
+    		chn, 0x62, 0x00,
+    		chn, 0x06, fxBits[0],
+    		chn, 0x26, fxBits[1],
     	];
-        pkt.postln;
     
     	kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
     }); 
 },(
     kemperMIDI: -1,
-	addrPg: 4,
-	addrNr: 1,
-	val: 0,
+	addrPg: 50,
+	fxKey: 'empty', 
 ))
 )
 
-1.8.round.clip(0,1)
+
 
 (
 Pbind(
-    \type,\kemperSet,
-    \dur,0.01,
+    \typl,\kemperFxType,
+    \dur,Pseq([0.1],inf),
     \kemperMIDI,k,
-    \val,Pseg([0,1],[30]),
-    \addrPg,\rig,
-    \addrNr,\transpose,
+    \addrPg, \effectModA,
 ).play
 )
 
-k.set(40,4,0.5)
+e = ()
 
