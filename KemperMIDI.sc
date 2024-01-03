@@ -50,7 +50,7 @@ KemperMIDI {
 		midiOut.sysex( pkt.as( Int8Array ) );
 	}
 
-	fxType { |addrPg, fxKey|                      // consider adding startOn: true
+	fxType { |addrPg, fxKey |                      // consider adding startOn: true
 		var page = this.prPageCheck( addrPg );    // this could make sense probably
         var fxBits = fxKeys[ fxKey.asSymbol ];
 		var chn = (chan - 1) + 0xB0;
@@ -59,6 +59,27 @@ KemperMIDI {
 			chn, 0x62, 0x00,
 			chn, 0x06, fxBits[0],
 			chn, 0x26, fxBits[1],
+		];
+		midiOut.sysex( pkt.as( Int8Array ) );
+	}
+
+	fxTypeOn { |addrPg, fxKey, switchOn = true|
+		var page = this.prPageCheck( addrPg );        
+        var fxBits = fxKeys[ fxKey.asSymbol ];
+		var chn = (chan - 1) + 0xB0;
+       	var onOff = case
+        { switchOn == false }{ 0x00 }
+		{ switchOn == true }{ 0x01 }
+		{ "switchOn must be a boolean".throw };
+		var pkt = [
+			chn, 0x63, page,
+			chn, 0x62, 0x00,
+			chn, 0x06, fxBits[0],
+			chn, 0x26, fxBits[1],
+            chn, 0x63, page,
+			chn, 0x62, 0x03,
+			chn, 0x06, 0x00, 
+			chn, 0x26, onOff,            
 		];
 		midiOut.sysex( pkt.as( Int8Array ) );
 	}
