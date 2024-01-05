@@ -4,6 +4,8 @@ k = KemperMIDI("MIDI Monitor (Untitled)", "MIDI Monitor (Untitled)");
 
 k = KemperMIDI("Midi Through","Midi Through Port-0")
 
+k.fxTypeOn(\effectModA,\wahWah,true)
+
 MIDIClient.destinations.do(_.postln)
 
 
@@ -31,7 +33,6 @@ Event.addEventType(\kemperFxType,{
 	fxKey: 'empty', 
 ))
 )
-
 
 
 (
