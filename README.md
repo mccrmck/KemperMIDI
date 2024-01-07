@@ -2,7 +2,7 @@
 
 A SuperCollider class for sending 14-bit MIDI to control the [Kemper](https://www.kemper-amps.com) digital guitar amplifer. (Note: this has only been tested on a Kemper Stage Profiler and on macOS)
 
-Details about how the Kemper receives MIDI, relevant integers for the Address Pages / Address Numbers, and for a list of the available parameters can be found in the attached MIDI Parameter Documentation 8.6 (available to downlaod [here](https://www.kemper-amps.com/downloads/5/User-Manuals))
+Details about how the Kemper receives MIDI sysex messages, relevant integers for the Address Pages / Address Numbers, and a list of available parameters can be found in the MIDI Parameter Documentation 8.6 (in this repository, but also available to download [here](https://www.kemper-amps.com/downloads/5/User-Manuals))
 
 Basic usage:
 
