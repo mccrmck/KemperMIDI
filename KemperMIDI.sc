@@ -181,12 +181,12 @@ KemperMIDI {
             studioEQMid2Q:               51,
             wahPeakRange:                52,
             ducking:                     53,
-            mix2:                        54,              // (Pitch Mix / Octaver Mix / Delay Mix Serial / Crystal Mix / Space Intensity)
+            mix2:                        54, // (Pitch Mix / Octaver Mix / Delay Mix Serial / Crystal Mix / Space Intensity)
             voiceBalance:                55,
             delayBalance:                55,
             voice1Pitch:                 56,
             toePitch:                    56,
-            transposePitch:              56,
+            transposePitch:              56, // "range 28-100" this is probably the same for everything on 56
             quadDelayVoicePitch4:        56,
             delayCrystal1Pitch:          56,
             voice2Pitch:                 57,
@@ -552,7 +552,7 @@ KemperMIDI {
                     chan, 0x26, lsb,
                 ];
 
-                kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
+                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             });
         },(
             kemperMIDI: -1,
@@ -577,7 +577,7 @@ KemperMIDI {
                     chn, 0x26, val,
                 ];
 
-                kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
+                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             }); 
         },(
             kemperMIDI: -1,
@@ -597,7 +597,7 @@ KemperMIDI {
                 var onOff = case
                 { ~switchOn == false }{ 0x00 }
                 { ~switchOn == true }{ 0x01 }
-                { "switchOn must be a boolean".throw };
+                { "switchOn must be a boolean".error };
                 var pkt = [
                     chn, 0x63, page,
                     chn, 0x62, 0x00,
@@ -609,7 +609,7 @@ KemperMIDI {
                     chn, 0x26, onOff,            
                 ];
 
-                kMIDI.midiOut.sysex( pkt.as( Int8Array ) );
+                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             }); 
         },(
             kemperMIDI: -1,
