@@ -552,7 +552,7 @@ KemperMIDI {
                     chan, 0x26, lsb,
                 ];
 
-                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
+                thisThread.clock.sched(~latency, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             });
         },(
             kemperMIDI: -1,
@@ -577,7 +577,7 @@ KemperMIDI {
                     chn, 0x26, val,
                 ];
 
-                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
+                thisThread.clock.sched(~latency, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             }); 
         },(
             kemperMIDI: -1,
@@ -609,7 +609,7 @@ KemperMIDI {
                     chn, 0x26, onOff,            
                 ];
 
-                thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
+                thisThread.clock.sched(~latency, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
             }); 
         },(
             kemperMIDI: -1,

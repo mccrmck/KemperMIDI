@@ -28,6 +28,8 @@ Event.addEventType(\kemperSet,#{|server|
             chan, 0x26, lsb,
         ];
 
+        ~lag.postln;
+
         thisThread.clock.sched(~lag, kMIDI.midiOut.sysex( pkt.as( Int8Array ) ) )
     });
 },(
@@ -44,11 +46,13 @@ Event.addEventType(\kemperSet,#{|server|
 p = Ppar([
     Pbind(
         \type,\kemperSet,
-        \dur,Pseq([60/45],3),
+        \dur,Pseq([60/130],3),
         \kemperMIDI,k,
-        \addrPg, \effectModA,
-    ),
-    Click(45,repeats:3).pattern
+        \addrPg, \effectModC,
+        \addrNr,\onOff,
+        \lag,4,
+        ),
+    Click(130,repeats:3).pattern
    ]).play
 );
 
@@ -70,9 +74,19 @@ Pbind(
     \array,[Int8Array[176,]]
 )
 )
-k.midiOut.performList(\sysex,Int8Array[0xB0,0x63,50])
+k.midiOut.performList(\sysex,*[Int8Array[0xB0,0x63,50],Int8Array[0xB0,0x63,55]])
+
+
+[Int8Array[0xB0,0x63,50]].asControlInput.flop
+
+a = #{}
 
 ~run = 4
 a = {|run,i| ~run.postln;i * 2}
 a.valueEnvir
 currentEnvironment
+.sysex
+
+
+
+k.fxType(\effectModC,\wahWah,true)
